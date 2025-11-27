@@ -1,30 +1,33 @@
-name: Deploy Static Website to Azure Blob (Reusable)
+name: Deploy Static Website (Reusable)
 
 on:
   workflow_call:
     inputs:
-      branch:
-        required: true
-        type: string
       source-folder:
         required: true
         type: string
 
+    # Secrets that must be passed explicitly
+    secrets:
+      AZURE_STORAGE_ACCOUNT:
+        required: true
+      AZURE_STORAGE_KEY:
+        required: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Deploy to Azure Blob Storage
+      - name: Deploy to Azure Blob
         uses: azure/CLI@v2
         with:
           azcliversion: latest
           inlineScript: |
             az storage blob upload-batch \
-              --source ${{ inputs['source-folder'] }} \
+              --source ${{ inputs.source-folder }} \
               --destination '$web' \
               --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
               --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
