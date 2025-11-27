@@ -27,12 +27,12 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            echo "Deploying '${{ inputs.source-folder }}' to folder '${{ inputs.destination-folder }}' in \$web..."
+            echo "Deploying '${{ inputs.source-folder }}' to '$web/${{ inputs.destination-folder }}' ..."
 
             az storage blob upload-batch \
               --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
               --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
               --source "${{ inputs.source-folder }}" \
-              --destination "${{ inputs.destination-folder }}" \
-              --container-name '$web' \
+              --destination '$web' \
+              --destination-path "${{ inputs.destination-folder }}" \
               --overwrite
