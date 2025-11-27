@@ -1,0 +1,31 @@
+name: Deploy Static Website to Azure Blob (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      source-folder:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Azure Blob Storage
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage blob upload-batch \
+              --source ${{ inputs['source-folder'] }} \
+              --destination '$web' \
+              --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+              --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
+              --overwrite
