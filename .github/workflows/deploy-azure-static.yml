@@ -18,6 +18,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,14 +26,11 @@ jobs:
       - name: Deploy to Azure Blob
         uses: azure/CLI@v2
         with:
-          azcliversion: latest
           inlineScript: |
-            echo "Deploying '${{ inputs.source-folder }}' to '$web/${{ inputs.destination-folder }}' ..."
-
+            echo "Deploying '${{ inputs.source-folder }}' to '/${{ inputs.destination-folder }}' ..."
             az storage blob upload-batch \
-              --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
-              --account-key ${{ secrets.AZURE_STORAGE_KEY }} \
+              --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+              --account-key "${{ secrets.AZURE_STORAGE_KEY }}" \
+              --destination '$web/${{ inputs.destination-folder }}' \
               --source "${{ inputs.source-folder }}" \
-              --destination '$web' \
-              --destination-path "${{ inputs.destination-folder }}" \
               --overwrite
