@@ -31,7 +31,7 @@ jobs:
             az storage blob delete-batch \
               --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
               --account-key "${{ secrets.AZURE_STORAGE_KEY }}" \
-              --source "\$web/${{ inputs.destination-folder }}"
+              --source '$web'
 
       - name: Upload new files
         uses: azure/CLI@v2
