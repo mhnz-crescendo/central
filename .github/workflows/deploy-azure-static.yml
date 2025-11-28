@@ -23,14 +23,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Azure Blob
+      - name: Clean destination folder
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            echo "Deploying '${{ inputs.source-folder }}' to '/${{ inputs.destination-folder }}' ..."
+            echo "Cleaning '$web/${{ inputs.destination-folder }}'..."
+            az storage blob delete-batch \
+              --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+              --account-key "${{ secrets.AZURE_STORAGE_KEY }}" \
+              --source "\$web/${{ inputs.destination-folder }}"
+
+      - name: Upload new files
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            echo "Deploying '${{ inputs.source-folder }}' to '/${{ inputs.destination-folder }}'..."
             az storage blob upload-batch \
               --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
               --account-key "${{ secrets.AZURE_STORAGE_KEY }}" \
-              --destination '$web/${{ inputs.destination-folder }}' \
+              --destination "\$web/${{ inputs.destination-folder }}" \
               --source "${{ inputs.source-folder }}" \
               --overwrite
