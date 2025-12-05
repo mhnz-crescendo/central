@@ -1,0 +1,49 @@
+name: Deploy Static Website (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      source-folder:
+        required: true
+        type: string
+    secrets:
+      STORAGE_ACCOUNT_NAME:
+        required: true   # repo-specific secret
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          enable-oidc: true
+          client-id: ${{ vars.ARM_CLIENT_ID }}
+          tenant-id: ${{ vars.ARM_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+
+      - name: Clean $web container
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            echo "Cleaning entire $web container..."
+            az storage blob delete-batch \
+              --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
+              --auth-mode login \
+              --source '$web'
+
+      - name: Upload site files
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            echo "Deploying '${{ inputs.source-folder }}' to $web..."
+            az storage blob upload-batch \
+              --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
+              --auth-mode login \
+              --destination '$web' \
+              --source "${{ inputs.source-folder }}" \
+              --overwrite
